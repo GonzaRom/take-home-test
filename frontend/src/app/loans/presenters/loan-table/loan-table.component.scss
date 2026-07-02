@@ -1,0 +1,99 @@
+.loan-card {
+  border-color: #dce3ec;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #ffffff;
+  box-shadow: 0 14px 36px rgba(31, 45, 61, 0.08);
+}
+
+.loan-card__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 56px;
+  padding: 0 20px;
+  border-bottom: 1px solid #edf1f5;
+}
+
+.loan-card__caption {
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: #435064;
+}
+
+.table-wrap {
+  overflow-x: auto;
+}
+
+mat-paginator {
+  border-top: 1px solid #edf1f5;
+}
+
+table {
+  width: 100%;
+  min-width: 620px;
+}
+
+th {
+  color: #667085;
+  font-weight: 500;
+}
+
+td {
+  color: #172033;
+}
+
+.applicant-name {
+  font-weight: 500;
+}
+
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 74px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 500;
+  line-height: 1.25;
+}
+
+.status-pill--active {
+  background: #e8f5ec;
+  color: #21633b;
+}
+
+.status-pill--paid {
+  background: #edf2ff;
+  color: #3157a3;
+}
+
+.empty-state {
+  min-height: 180px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 32px;
+  text-align: center;
+  color: #667085;
+
+  p {
+    margin: 0;
+  }
+
+  mat-icon {
+    width: 36px;
+    height: 36px;
+    font-size: 36px;
+    color: #93a4b8;
+  }
+}
+
+@media (max-width: 640px) {
+  .loan-card__header {
+    padding: 0 12px 0 16px;
+  }
+}

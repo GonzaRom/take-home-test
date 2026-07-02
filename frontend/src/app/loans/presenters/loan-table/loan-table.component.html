@@ -1,0 +1,66 @@
+<mat-card class="loan-card" appearance="outlined">
+  <div class="loan-card__header">
+    <span class="loan-card__caption">Existing Loans</span>
+    <button mat-icon-button type="button" aria-label="Refresh loans" (click)="refresh()">
+      <mat-icon aria-hidden="true">refresh</mat-icon>
+    </button>
+  </div>
+
+  @if (isEmpty) {
+    <div class="empty-state">
+      <mat-icon aria-hidden="true">account_balance</mat-icon>
+      <p>No loans are available yet.</p>
+    </div>
+  } @else {
+    <div class="table-wrap">
+      <table mat-table [dataSource]="loans" [trackBy]="trackByLoanId">
+        <ng-container matColumnDef="principalAmount">
+          <th mat-header-cell *matHeaderCellDef>Loan Amount</th>
+          <td mat-cell *matCellDef="let loan">
+            {{ loan.principalAmount | currency }}
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="currentBalance">
+          <th mat-header-cell *matHeaderCellDef>Current Balance</th>
+          <td mat-cell *matCellDef="let loan">
+            {{ loan.currentBalance | currency }}
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="applicantName">
+          <th mat-header-cell *matHeaderCellDef>Applicant</th>
+          <td mat-cell *matCellDef="let loan">
+            <span class="applicant-name">{{ loan.applicantName }}</span>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="status">
+          <th mat-header-cell *matHeaderCellDef>Status</th>
+          <td mat-cell *matCellDef="let loan">
+            <span
+              class="status-pill"
+              [class.status-pill--paid]="isPaidStatus(loan.status)"
+              [class.status-pill--active]="!isPaidStatus(loan.status)"
+            >
+              {{ getStatusLabel(loan.status) | titlecase }}
+            </span>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+      </table>
+    </div>
+
+  }
+
+  <mat-paginator
+    [length]="totalCount"
+    [pageIndex]="pageNumber - 1"
+    [pageSize]="pageSize"
+    [pageSizeOptions]="pageSizeOptions"
+    aria-label="Loan list pagination"
+    (page)="onPageChange($event)"
+  ></mat-paginator>
+</mat-card>

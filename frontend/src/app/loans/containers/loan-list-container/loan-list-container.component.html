@@ -1,0 +1,37 @@
+<main class="loan-page">
+  <section class="loan-page__content">
+    <h1>Loan Management</h1>
+
+    @if (vm$ | async; as vm) {
+      @if (vm.isLoading) {
+        <mat-card class="state-card" appearance="outlined">
+          <mat-progress-spinner
+            diameter="36"
+            mode="indeterminate"
+            aria-label="Loading loans"
+          ></mat-progress-spinner>
+          <p>Loading loans...</p>
+        </mat-card>
+      } @else if (vm.error) {
+        <mat-card class="state-card state-card--error" appearance="outlined">
+          <mat-icon aria-hidden="true">error_outline</mat-icon>
+          <p>{{ vm.error }}</p>
+          <button mat-stroked-button type="button" (click)="refresh()">
+            <mat-icon aria-hidden="true">refresh</mat-icon>
+            Retry
+          </button>
+        </mat-card>
+      } @else {
+        <app-loan-table
+          [loans]="vm.loans"
+          [totalCount]="vm.totalCount"
+          [pageNumber]="vm.pageNumber"
+          [pageSize]="vm.pageSize"
+          [isEmpty]="vm.isEmpty"
+          (pageChanged)="changePage($event)"
+          (refreshRequested)="refresh()"
+        ></app-loan-table>
+      }
+    }
+  </section>
+</main>
