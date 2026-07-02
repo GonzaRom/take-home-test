@@ -1,3 +1,4 @@
+using Fundo.Application.Common;
 using Fundo.Application.Loans;
 using Fundo.Domain.Loans;
 using Microsoft.EntityFrameworkCore;
@@ -20,11 +21,23 @@ public sealed class LoanRepository : ILoanRepository
             .FirstOrDefaultAsync(loan => loan.Id == id, cancellationToken);
     }
 
-    public async Task<IReadOnlyList<Loan>> GetListAsync(CancellationToken cancellationToken = default)
+    public async Task<IPagedResult<Loan>> GetListAsync(PaginationRequest pagination, CancellationToken cancellationToken = default)
     {
-        return await dbContext.Loans
-            .OrderBy(loan => loan.ApplicantName)
+        var totalCount = await dbContext.Loans.CountAsync(cancellationToken);
+        var skip = (long)(pagination.PageNumber - 1) * pagination.PageSize;
+        if (skip >= totalCount)
+        {
+            return new PagedResult<Loan>(Array.Empty<Loan>(), pagination.PageNumber, pagination.PageSize, totalCount);
+        }
+
+        var loans = await dbContext.Loans
+            .OrderByDescending(loan => loan.CreatedAtUtc)
+            .ThenBy(loan => loan.Id)
+            .Skip((int)skip)
+            .Take(pagination.PageSize)
             .ToListAsync(cancellationToken);
+
+        return new PagedResult<Loan>(loans, pagination.PageNumber, pagination.PageSize, totalCount);
     }
 
     public async Task AddAsync(Loan loan, CancellationToken cancellationToken = default)

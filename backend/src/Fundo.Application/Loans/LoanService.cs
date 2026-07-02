@@ -38,11 +38,19 @@ public sealed class LoanService : ILoanService
         return Result<LoanDetailsDto>.Success(MapToDetailsDto(loan));
     }
 
-    public async Task<Result<IReadOnlyList<LoanSummaryDto>>> GetListAsync(CancellationToken cancellationToken = default)
+    public async Task<Result<IPagedResult<LoanSummaryDto>>> GetListAsync(PaginationRequest pagination, CancellationToken cancellationToken = default)
     {
-        var loans = await loanRepository.GetListAsync(cancellationToken);
+        var validationError = pagination.GetValidationError();
+        if (validationError is not null)
+        {
+            return Result<IPagedResult<LoanSummaryDto>>.Invalid(validationError);
+        }
 
-        return Result<IReadOnlyList<LoanSummaryDto>>.Success(loans.Select(MapToSummaryDto).ToList());
+        var loans = await loanRepository.GetListAsync(pagination, cancellationToken);
+        var loanSummaryDtos = loans.Items.Select(MapToSummaryDto).ToList();
+
+        return Result<IPagedResult<LoanSummaryDto>>.Success(
+            new PagedResult<LoanSummaryDto>(loanSummaryDtos, loans.PageNumber, loans.PageSize, loans.TotalCount));
     }
 
     public async Task<Result<LoanDetailsDto>> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
