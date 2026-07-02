@@ -1,0 +1,44 @@
+name: Backend PR Tests
+
+on:
+  pull_request:
+    paths:
+      - 'backend/**'
+      - 'docker-compose.yml'
+      - '.dockerignore'
+      - '.github/workflows/backend-*.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: Restore, build and test backend
+    runs-on: ubuntu-latest
+
+    env:
+      DOTNET_VERSION: '6.0.x'
+      DOTNET_NOLOGO: true
+      DOTNET_CLI_TELEMETRY_OPTOUT: true
+
+    defaults:
+      run:
+        working-directory: backend/src
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Restore backend dependencies
+        run: dotnet restore
+
+      - name: Build backend
+        run: dotnet build --no-restore --configuration Debug
+
+      - name: Run backend tests
+        run: dotnet test --no-build --configuration Debug --logger "trx;LogFileName=backend-pr-tests.trx"
