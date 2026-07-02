@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Fundo.Application.Common;
@@ -39,13 +38,23 @@ namespace Fundo.Applications.WebApi.Controllers
         /// <summary>
         /// Lists the available loan summaries for the loan management view.
         /// </summary>
+        /// <param name="pagination">Pagination settings. Defaults to page 1 and page size 10.</param>
         /// <param name="cancellationToken">Request cancellation token.</param>
-        /// <returns>Loan summaries ordered for display.</returns>
-        [ProducesResponseType(typeof(IReadOnlyList<LoanSummaryDto>), StatusCodes.Status200OK)]
+        /// <returns>Loan summaries ordered for display with pagination metadata.</returns>
+        [ProducesResponseType(typeof(PagedResult<LoanSummaryDto>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
         [HttpGet]
-        public async Task<ActionResult<IReadOnlyList<LoanSummaryDto>>> GetListAsync(CancellationToken cancellationToken)
+        public async Task<ActionResult<IPagedResult<LoanSummaryDto>>> GetListAsync(
+            [FromQuery] PaginationRequest pagination,
+            CancellationToken cancellationToken)
         {
-            var result = await loanService.GetListAsync(cancellationToken);
+            var validationError = pagination.GetValidationError();
+            if (validationError is not null)
+            {
+                return BadRequest(validationError);
+            }
+
+            var result = await loanService.GetListAsync(pagination, cancellationToken);
 
             return ToActionResult(result, loans => Ok(loans));
         }

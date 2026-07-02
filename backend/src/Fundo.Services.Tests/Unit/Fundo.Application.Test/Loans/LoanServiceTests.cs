@@ -30,17 +30,20 @@ public sealed class LoanServiceTests
 
         var loanRepository = new Mock<ILoanRepository>();
         loanRepository
-            .Setup(repository => repository.GetListAsync(It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new List<Loan> { loan });
+            .Setup(repository => repository.GetListAsync(It.IsAny<PaginationRequest>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new PagedResult<Loan>(new List<Loan> { loan }, 1, 10, 1));
 
         var service = new LoanService(loanRepository.Object);
 
         // Act
-        var result = await service.GetListAsync();
+        var result = await service.GetListAsync(new PaginationRequest());
 
         // Assert
         result.Status.Should().Be(ResultStatus.Success);
-        var summary = result.Value.Should().ContainSingle().Subject;
+        result.Value.PageNumber.Should().Be(1);
+        result.Value.PageSize.Should().Be(10);
+        result.Value.TotalCount.Should().Be(1);
+        var summary = result.Value.Items.Should().ContainSingle().Subject;
         summary.Id.Should().Be(loan.Id);
         summary.ApplicantName.Should().Be(loan.ApplicantName);
         summary.ApplicantEmail.Should().Be(loan.ApplicantEmail);

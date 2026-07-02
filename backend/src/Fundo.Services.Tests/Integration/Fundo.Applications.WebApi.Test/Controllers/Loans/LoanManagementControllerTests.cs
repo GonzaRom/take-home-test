@@ -7,7 +7,6 @@ using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.EntityFrameworkCore;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Json;
@@ -29,6 +28,7 @@ namespace Fundo.Services.Tests.Integration.Fundo.Applications.WebApi.Test.Contro
         public LoanManagementControllerTests(LoanWebApplicationFactory factory)
         {
             _factory = factory;
+            _factory.ResetDatabase();
             _client = factory.CreateClient(new WebApplicationFactoryClientOptions
             {
                 AllowAutoRedirect = false
@@ -50,18 +50,119 @@ namespace Fundo.Services.Tests.Integration.Fundo.Applications.WebApi.Test.Contro
             Assert.True(paymentResponse.IsSuccessStatusCode, paymentBody);
 
             // Act
-            var response = await _client.GetAsync("/loans");
+            var response = await _client.GetAsync("/loans?pageSize=100");
             var body = await response.Content.ReadAsStringAsync();
+            var pagedLoans = await response.Content.ReadFromJsonAsync<PagedResult<LoanSummaryDto>>();
 
             // Assert
-            Assert.Equal(System.Net.HttpStatusCode.OK, response.StatusCode);
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            Assert.NotNull(pagedLoans);
+            Assert.Contains(pagedLoans!.Items, loan => loan.Id == createdLoan.Id);
+            Assert.Null(typeof(LoanSummaryDto).GetProperty("Payments"));
+
             using var json = JsonDocument.Parse(body);
             var listedLoan = json.RootElement
+                .GetProperty("items")
                 .EnumerateArray()
                 .Single(loan => loan.GetProperty("id").GetGuid() == createdLoan.Id);
 
             Assert.False(listedLoan.TryGetProperty("payments", out _));
             Assert.Equal("List Contract Test", listedLoan.GetProperty("applicantName").GetString());
+        }
+
+        [Fact]
+        public async Task GetList_ShouldReturnDefaultPagination_WhenQueryIsOmitted()
+        {
+            // Act
+            var response = await _client.GetAsync("/loans");
+            var pagedLoans = await response.Content.ReadFromJsonAsync<PagedResult<LoanSummaryDto>>();
+
+            // Assert
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            Assert.NotNull(pagedLoans);
+            Assert.Equal(1, pagedLoans!.PageNumber);
+            Assert.Equal(10, pagedLoans.PageSize);
+            Assert.Equal(3, pagedLoans.TotalCount);
+            Assert.Equal(1, pagedLoans.TotalPages);
+            Assert.False(pagedLoans.HasPreviousPage);
+            Assert.False(pagedLoans.HasNextPage);
+            Assert.Equal(3, pagedLoans.Items.Count);
+            Assert.Equal("Robert Johnson", pagedLoans.Items[0].ApplicantName);
+        }
+
+        [Fact]
+        public async Task GetList_ShouldReturnRequestedPage_WhenPaginationIsProvided()
+        {
+            // Act
+            var response = await _client.GetAsync("/loans?pageNumber=2&pageSize=2");
+            var pagedLoans = await response.Content.ReadFromJsonAsync<PagedResult<LoanSummaryDto>>();
+
+            // Assert
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            Assert.NotNull(pagedLoans);
+            Assert.Equal(2, pagedLoans!.PageNumber);
+            Assert.Equal(2, pagedLoans.PageSize);
+            Assert.Equal(3, pagedLoans.TotalCount);
+            Assert.Equal(2, pagedLoans.TotalPages);
+            Assert.True(pagedLoans.HasPreviousPage);
+            Assert.False(pagedLoans.HasNextPage);
+            var loan = Assert.Single(pagedLoans.Items);
+            Assert.Equal("John Doe", loan.ApplicantName);
+        }
+
+        [Fact]
+        public async Task GetList_ShouldReturnEmptyItems_WhenPageIsBeyondAvailableData()
+        {
+            // Act
+            var response = await _client.GetAsync("/loans?pageNumber=3&pageSize=2");
+            var pagedLoans = await response.Content.ReadFromJsonAsync<PagedResult<LoanSummaryDto>>();
+
+            // Assert
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            Assert.NotNull(pagedLoans);
+            Assert.Equal(3, pagedLoans!.PageNumber);
+            Assert.Equal(2, pagedLoans.PageSize);
+            Assert.Equal(3, pagedLoans.TotalCount);
+            Assert.Equal(2, pagedLoans.TotalPages);
+            Assert.True(pagedLoans.HasPreviousPage);
+            Assert.False(pagedLoans.HasNextPage);
+            Assert.Empty(pagedLoans.Items);
+        }
+
+        [Fact]
+        public async Task GetList_ShouldReturnBadRequest_WhenPageNumberIsInvalid()
+        {
+            // Act
+            var response = await _client.GetAsync("/loans?pageNumber=0&pageSize=10");
+            var body = await response.Content.ReadAsStringAsync();
+
+            // Assert
+            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+            Assert.Contains("pageNumber must be greater than or equal to 1.", body);
+        }
+
+        [Fact]
+        public async Task GetList_ShouldReturnBadRequest_WhenPageSizeIsInvalid()
+        {
+            // Act
+            var response = await _client.GetAsync("/loans?pageNumber=1&pageSize=0");
+            var body = await response.Content.ReadAsStringAsync();
+
+            // Assert
+            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+            Assert.Contains("pageSize must be between 1 and 100.", body);
+        }
+
+        [Fact]
+        public async Task GetList_ShouldReturnBadRequest_WhenPageSizeExceedsMaximum()
+        {
+            // Act
+            var response = await _client.GetAsync("/loans?pageNumber=1&pageSize=101");
+            var body = await response.Content.ReadAsStringAsync();
+
+            // Assert
+            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+            Assert.Contains("pageSize must be between 1 and 100.", body);
         }
 
         [Fact]
@@ -308,6 +409,14 @@ namespace Fundo.Services.Tests.Integration.Fundo.Applications.WebApi.Test.Contro
 
     public sealed class LoanWebApplicationFactory : WebApplicationFactory<global::Fundo.Applications.WebApi.Startup>
     {
+        public void ResetDatabase()
+        {
+            using var scope = Services.CreateScope();
+            var dbContext = scope.ServiceProvider.GetRequiredService<LoanDbContext>();
+            dbContext.Database.EnsureDeleted();
+            dbContext.Database.EnsureCreated();
+        }
+
         protected override void ConfigureWebHost(IWebHostBuilder builder)
         {
             builder.UseEnvironment("Development");
@@ -336,7 +445,7 @@ namespace Fundo.Services.Tests.Integration.Fundo.Applications.WebApi.Test.Contro
             throw CreateException();
         }
 
-        public Task<Result<IReadOnlyList<LoanSummaryDto>>> GetListAsync(CancellationToken cancellationToken = default)
+        public Task<Result<IPagedResult<LoanSummaryDto>>> GetListAsync(PaginationRequest pagination, CancellationToken cancellationToken = default)
         {
             throw CreateException();
         }
