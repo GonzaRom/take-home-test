@@ -1,87 +1,173 @@
-# --- .NET ---
-bin/
-obj/
-*.exe
-*.dll
-*.pdb
-*.app
-*.so
-*.dylib
-*.db
-*.log
-*.csproj.user
-*.csproj.vs.json
+# =========================
+# OS / Editor
+# =========================
+
+.DS_Store
+Thumbs.db
+desktop.ini
+
+.vs/
+.vscode/
+.idea/
 *.suo
-*.sln.ide
+*.user
 *.userosscache
 *.sln.docstates
+*.rsuser
 
-# Rider / VS Code
-.idea/
-.vscode/
+# =========================
+# Agent / AI tool folders
+# =========================
 
-# Logs and temporary files
-*.log
-*.tmp
-*.bak
-*.swp
-*.sln.cache
+.agent/
+.codex/
+.cursor/
+.windsurf/
+.claude/
 
-# User-specific configurations
-*.vs/
-.vs/
+# =========================
+# Local config / secrets
+# =========================
 
-# Dotnet CLI
-.dotnet/
+.env
+.env.*
+!.env.example
 
-# Local dependency configuration
+*.local
+*.local.*
+*.secret
+*.secrets
+
+appsettings.Local.json
+appsettings.*.Local.json
+appsettings.*.local.json
+
+secrets.json
+.local.settings.json
+
+# =========================
+# .NET build outputs
+# =========================
+
+bin/
+obj/
+out/
+publish/
+
+[Bb]uild/
+[Bb]uilds/
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+[Aa][Rr][Mm]/
+[Aa][Rr][Mm]64/
+
+# =========================
+# .NET test / coverage
+# =========================
+
+TestResults/
+[Tt]est[Rr]esult*/
+coverage/
+coverage.xml
+coverage.json
+coverage.opencover.xml
+*.coverage
+*.coveragexml
+*.trx
+
+# =========================
+# NuGet
+# =========================
+
+*.nupkg
+*.snupkg
 .nuget/
 packages/
 project.lock.json
 project.assets.json
 
-# Development certificates
-*.pfx
-*.p12
+# =========================
+# ASP.NET / IIS Express
+# =========================
 
-# Entity Framework Migrations
-migrations/
+.vs/config/applicationhost.config
+iisexpress/
+Properties/launchSettings.json
 
-# --- ANGULAR / TypeScript ---
-node_modules/
-dist/
-coverage/
-package-lock.json
-yarn.lock
-pnpm-lock.yaml
-.npmrc
-.npm/
-.nodemon-debug.json
+# =========================
+# Entity Framework
+# =========================
 
-# IDEs and editors
-/.idea/
-/.vscode/
-/.editorconfig
+*.db
+*.sqlite
+*.sqlite3
 
+# =========================
 # Logs
+# =========================
+
+*.log
+logs/
+Logs/
+
+# =========================
+# Angular / Node
+# =========================
+
+node_modules/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
-lerna-debug.log*
 
-# Build files
-/.angular/
-out-tsc/
-.DS_Store
+.angular/
+.angular/cache/
 
-# Environment and credentials
-.env
-.env.local
-.env.*.local
+dist/
+tmp/
+temp/
 
-# Tests
-karma.conf.js
-test-report/
-junit.xml
-mocha.json
+# =========================
+# Angular test / coverage
+# =========================
+
+coverage/
+.nyc_output/
+
+# =========================
+# TypeScript
+# =========================
+
+*.tsbuildinfo
+
+# =========================
+# Build / cache
+# =========================
+
+.cache/
+.parcel-cache/
+.eslintcache
+
+# =========================
+# Optional package manager files
+# =========================
+
+.pnpm-store/
+
+# =========================
+# Docker local overrides
+# =========================
+
+docker-compose.override.yml
+docker-compose.*.override.yml
+
+# =========================
+# Misc
+# =========================
+
+*.bak
+*.tmp
+*.swp
+*.orig
