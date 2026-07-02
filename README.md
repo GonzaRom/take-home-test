@@ -81,3 +81,15 @@ Develop a **lightweight Angular app** to interact with the backend
 ## **Additional Information**
 
 Candidates are encouraged to include a `README.md` file in their repository detailing their implementation approach, any challenges they faced, features they couldn't complete, and any improvements they would make given more time. Ideally, the implementation should be completed within **two days** of starting the test.
+
+---
+
+## Implementation Notes
+
+Backend setup, API routes, database migrations, Docker usage and test commands are documented in:
+
+```text
+backend/src/README.md
+```
+
+The root `docker-compose.yml` supports the backend API and SQL Server for local review. See the backend README for the exact commands and current endpoint list.
