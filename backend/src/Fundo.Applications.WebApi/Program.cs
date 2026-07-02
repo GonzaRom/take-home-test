@@ -14,7 +14,8 @@ namespace Fundo.Applications.WebApi
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Unhandled WebApi exception: {ex.Message}");
+                Console.Error.WriteLine($"Unhandled WebApi exception: {ex}");
+                throw;
             }
             finally
             {
