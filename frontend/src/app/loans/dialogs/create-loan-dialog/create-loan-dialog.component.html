@@ -1,0 +1,112 @@
+<h2 mat-dialog-title>Add Loan</h2>
+
+<form [formGroup]="form" (ngSubmit)="submit()">
+  <mat-dialog-content class="dialog-content">
+    @if (submitError) {
+      <div class="dialog-error" role="alert">
+        <mat-icon aria-hidden="true">error_outline</mat-icon>
+        <span>{{ submitError }}</span>
+      </div>
+    }
+
+    <div class="form-grid">
+      <mat-form-field appearance="outline">
+        <mat-label>Applicant name</mat-label>
+        <input matInput formControlName="applicantName" autocomplete="name" />
+        @if (form.controls.applicantName.hasError('required')) {
+          <mat-error>Name is required.</mat-error>
+        } @else if (form.controls.applicantName.hasError('maxlength')) {
+          <mat-error>Use 200 characters or fewer.</mat-error>
+        }
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Applicant email</mat-label>
+        <input matInput type="email" formControlName="applicantEmail" autocomplete="email" />
+        @if (form.controls.applicantEmail.hasError('required')) {
+          <mat-error>Email is required.</mat-error>
+        } @else if (form.controls.applicantEmail.hasError('email')) {
+          <mat-error>Enter a valid email.</mat-error>
+        } @else if (form.controls.applicantEmail.hasError('maxlength')) {
+          <mat-error>Use 320 characters or fewer.</mat-error>
+        }
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Loan amount</mat-label>
+        <input
+          matInput
+          type="number"
+          min="0.01"
+          step="0.01"
+          placeholder="0.00"
+          formControlName="principalAmount"
+        />
+        @if (form.controls.principalAmount.hasError('required')) {
+          <mat-error>Amount is required.</mat-error>
+        } @else if (form.controls.principalAmount.hasError('min')) {
+          <mat-error>Must be greater than 0.</mat-error>
+        }
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Current balance</mat-label>
+        <input
+          matInput
+          type="number"
+          min="0"
+          step="0.01"
+          placeholder="0.00"
+          formControlName="currentBalance"
+        />
+        @if (form.controls.currentBalance.hasError('required')) {
+          <mat-error>Balance is required.</mat-error>
+        } @else if (form.controls.currentBalance.hasError('min')) {
+          <mat-error>Cannot be negative.</mat-error>
+        } @else if (form.hasError('currentBalanceExceedsPrincipal') && form.controls.currentBalance.touched) {
+          <mat-error>Cannot exceed loan amount.</mat-error>
+        }
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Annual interest rate</mat-label>
+        <input
+          matInput
+          type="number"
+          min="0"
+          step="0.01"
+          placeholder="0.00"
+          formControlName="annualInterestRate"
+        />
+        <span matTextSuffix>%</span>
+        @if (form.controls.annualInterestRate.hasError('required')) {
+          <mat-error>Rate is required.</mat-error>
+        } @else if (form.controls.annualInterestRate.hasError('min')) {
+          <mat-error>Cannot be negative.</mat-error>
+        }
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Term months</mat-label>
+        <input matInput type="number" min="1" max="360" step="1" formControlName="termMonths" />
+        @if (form.controls.termMonths.hasError('required')) {
+          <mat-error>Term is required.</mat-error>
+        } @else if (form.controls.termMonths.hasError('min') || form.controls.termMonths.hasError('max')) {
+          <mat-error>Use 1 to 360 months.</mat-error>
+        }
+      </mat-form-field>
+    </div>
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button mat-button type="button" [disabled]="isSubmitting" (click)="cancel()">Cancel</button>
+    <button mat-flat-button type="submit" [disabled]="isSubmitting">
+      @if (isSubmitting) {
+        <mat-progress-spinner diameter="18" mode="indeterminate" aria-label="Creating loan"></mat-progress-spinner>
+      } @else {
+        <mat-icon aria-hidden="true">add</mat-icon>
+      }
+      Add Loan
+    </button>
+  </mat-dialog-actions>
+</form>

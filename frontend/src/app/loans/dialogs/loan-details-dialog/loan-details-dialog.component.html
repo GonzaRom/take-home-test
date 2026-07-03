@@ -1,0 +1,97 @@
+<h2 mat-dialog-title>Loan Details</h2>
+
+<mat-dialog-content class="dialog-content">
+  @if (vm$ | async; as vm) {
+    @if (vm.isLoading) {
+      <div class="dialog-state">
+        <mat-progress-spinner diameter="36" mode="indeterminate" aria-label="Loading loan details"></mat-progress-spinner>
+        <p>Loading loan details...</p>
+      </div>
+    } @else if (vm.error) {
+      <div class="dialog-state dialog-state--error" role="alert">
+        <mat-icon aria-hidden="true">error_outline</mat-icon>
+        <p>{{ vm.error }}</p>
+      </div>
+    } @else {
+      @if (vm.loan; as loan) {
+        <section class="details-grid" aria-label="Loan summary">
+          <div>
+            <span class="label">Applicant</span>
+            <strong>{{ loan.applicantName }}</strong>
+          </div>
+          <div>
+            <span class="label">Email</span>
+            <strong>{{ loan.applicantEmail }}</strong>
+          </div>
+          <div>
+            <span class="label">Loan amount</span>
+            <strong>{{ loan.principalAmount | currency }}</strong>
+          </div>
+          <div>
+            <span class="label">Current balance</span>
+            <strong>{{ loan.currentBalance | currency }}</strong>
+          </div>
+          <div>
+            <span class="label">Annual interest</span>
+            <strong>{{ loan.annualInterestRate }}%</strong>
+          </div>
+          <div>
+            <span class="label">Term</span>
+            <strong>{{ loan.termMonths }} months</strong>
+          </div>
+          <div>
+            <span class="label">Status</span>
+            <strong>{{ getStatusLabel(loan) }}</strong>
+          </div>
+          <div>
+            <span class="label">Created</span>
+            <strong>{{ loan.createdAtUtc | date: 'medium' }}</strong>
+          </div>
+        </section>
+
+        <section class="payment-section" aria-label="Payment history">
+          <h3>Payment History</h3>
+
+          @if (loan.payments.length === 0) {
+            <div class="empty-payments">
+              <mat-icon aria-hidden="true">receipt_long</mat-icon>
+              <p>No payments registered yet.</p>
+            </div>
+          } @else {
+            <div class="table-wrap">
+              <table mat-table [dataSource]="loan.payments">
+                <ng-container matColumnDef="paymentDateUtc">
+                  <th mat-header-cell *matHeaderCellDef>Date</th>
+                  <td mat-cell *matCellDef="let payment">
+                    {{ toBrowserLocalDate(payment.paymentDateUtc) | date: 'medium' }}
+                  </td>
+                </ng-container>
+
+                <ng-container matColumnDef="amount">
+                  <th mat-header-cell *matHeaderCellDef>Amount</th>
+                  <td mat-cell *matCellDef="let payment">
+                    {{ payment.amount | currency }}
+                  </td>
+                </ng-container>
+
+                <ng-container matColumnDef="note">
+                  <th mat-header-cell *matHeaderCellDef>Note</th>
+                  <td mat-cell *matCellDef="let payment" class="payment-note">
+                    {{ payment.note || '-' }}
+                  </td>
+                </ng-container>
+
+                <tr mat-header-row *matHeaderRowDef="paymentColumns"></tr>
+                <tr mat-row *matRowDef="let row; columns: paymentColumns"></tr>
+              </table>
+            </div>
+          }
+        </section>
+      }
+    }
+  }
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button type="button" mat-dialog-close>Close</button>
+</mat-dialog-actions>

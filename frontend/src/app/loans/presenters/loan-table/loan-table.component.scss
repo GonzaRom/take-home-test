@@ -1,0 +1,164 @@
+.loan-card {
+  border-color: #dce3ec;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #ffffff;
+  box-shadow: 0 14px 36px rgba(31, 45, 61, 0.08);
+}
+
+.loan-card__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  min-height: 64px;
+  padding: 0 16px 0 20px;
+  border-bottom: 1px solid #e1e7ef;
+}
+
+.loan-card__caption {
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: #435064;
+}
+
+.loan-card__actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.add-loan-button {
+  min-height: 36px;
+  padding: 0 14px;
+}
+
+.header-icon-button,
+.row-action-button {
+  color: #3157a3;
+}
+
+.table-wrap {
+  overflow-x: auto;
+}
+
+mat-paginator {
+  border-top: 1px solid #e1e7ef;
+}
+
+table {
+  width: 100%;
+  min-width: 760px;
+}
+
+th {
+  color: #667085;
+  font-weight: 500;
+}
+
+td {
+  color: #172033;
+}
+
+.applicant-name {
+  font-weight: 500;
+}
+
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 74px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 500;
+  line-height: 1.25;
+}
+
+.status-pill--active {
+  background: #e7f6ec;
+  color: #166534;
+}
+
+.status-pill--paid {
+  background: #edf2ff;
+  color: #3157a3;
+}
+
+.actions-header,
+.actions-cell {
+  width: 128px;
+  text-align: center;
+}
+
+.actions-cell {
+  white-space: nowrap;
+}
+
+.row-actions {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.row-action-button {
+  --mdc-fab-container-color: #edf4ff;
+  --mdc-fab-icon-color: #175cd3;
+  --mat-fab-foreground-color: #175cd3;
+
+  border: 1px solid #d6e4ff;
+  box-shadow: none;
+  color: #175cd3;
+
+  &:hover:not(:disabled) {
+    --mdc-fab-container-color: #eaf1ff;
+  }
+
+  mat-icon {
+    width: 20px;
+    height: 20px;
+    font-size: 20px;
+  }
+}
+
+.disabled-tooltip-wrap {
+  display: inline-flex;
+}
+
+.empty-state {
+  min-height: 180px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 32px;
+  text-align: center;
+  color: #667085;
+
+  p {
+    margin: 0;
+  }
+
+  mat-icon {
+    width: 36px;
+    height: 36px;
+    font-size: 36px;
+    color: #93a4b8;
+  }
+}
+
+@media (max-width: 640px) {
+  .loan-card__header {
+    align-items: flex-start;
+    flex-direction: column;
+    padding: 14px 12px 14px 16px;
+  }
+
+  .loan-card__actions {
+    width: 100%;
+    justify-content: flex-end;
+  }
+}

@@ -1,0 +1,64 @@
+.loan-page {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  padding: 56px 20px;
+  background: #f4f7fb;
+  color: #172033;
+  box-sizing: border-box;
+}
+
+.loan-page__content {
+  width: min(940px, 100%);
+}
+
+h1 {
+  margin: 0 0 28px;
+  text-align: center;
+  font-size: 2rem;
+  font-weight: 500;
+  letter-spacing: 0;
+}
+
+.state-card {
+  min-height: 196px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  padding: 32px;
+  text-align: center;
+  border-color: #dce3ec;
+  border-radius: 8px;
+  background: #ffffff;
+  box-shadow: 0 14px 36px rgba(31, 45, 61, 0.08);
+
+  p {
+    margin: 0;
+    color: #435064;
+  }
+}
+
+.state-card--error {
+  color: #8a1f1f;
+
+  p {
+    color: #5d3030;
+  }
+}
+
+button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+@media (max-width: 640px) {
+  .loan-page {
+    padding: 32px 12px;
+  }
+
+  h1 {
+    font-size: 1.7rem;
+  }
+}
