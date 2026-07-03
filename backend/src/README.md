@@ -61,7 +61,7 @@ Swagger URL depends on the active local launch profile or hosting URL. In Docker
 
 ## Database
 
-The backend uses EF Core with SQL Server persistence. The initial migration creates `Loans` and `Payments`, including a foreign key from payments to loans and seed data for three active loans.
+The backend uses EF Core with SQL Server persistence. The initial migration creates `Loans` and `Payments`, including a foreign key from payments to loans. The current seed data provides 15 active loans.
 
 Apply migrations manually from the repository root:
 
