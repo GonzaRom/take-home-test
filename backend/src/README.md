@@ -29,7 +29,7 @@ backend/src
 | Method | Route | Purpose |
 | --- | --- | --- |
 | `POST` | `/loans` | Create a loan and return the persisted loan details, including payment history. |
-| `GET` | `/loans` | List available loan summaries without payment history. |
+| `GET` | `/loans` | List paginated loan summaries without payment history. |
 | `GET` | `/loans/{id:guid}` | Retrieve one loan with payment history. |
 | `POST` | `/loans/{id:guid}/payment` | Register a payment and return the updated loan with payment history. |
 
@@ -57,7 +57,7 @@ The default non-Docker connection string in `Fundo.Applications.WebApi/appsettin
 Server=(localdb)\mssqllocaldb;Database=FundoLoans;Trusted_Connection=True;TrustServerCertificate=True
 ```
 
-Swagger URL depends on the active local launch profile or hosting URL. In Docker with default ports, it is available at `http://localhost:5080/swagger`.
+With the tracked launch profile or Docker defaults, Swagger is available at `http://localhost:5080/swagger`.
 
 ## Database
 
@@ -106,12 +106,12 @@ The compose file also supports these local-development overrides:
 - `API_HTTP_PORT`: host port for the API.
 - `SQLSERVER_HOST_PORT`: host port for SQL Server.
 - `SQLSERVER_DATABASE`: database name. Default: `FundoLoans`.
-- `MSSQL_SA_PASSWORD`: local SQL Server SA password. Default: `NiuroLocal#2026!`.
+- `MSSQL_SA_PASSWORD`: local SQL Server SA password. Default: `NiuroLocal#2026!`. This is a local Docker-only default.
 - `FRONTEND_ORIGIN`: allowed Angular development origin. Default: `http://localhost:4200`.
 
 Inside the Docker network, the API connects to SQL Server at `niuro-sqlserver,1433`. When Docker starts the API in `Development` with `Database__AutoMigrate=true`, pending EF Core migrations run during startup and seed the configured loan data.
 
-If the SQL Server password is changed after the project volume exists, SQL Server keeps the original password stored in that volume. To intentionally discard only this project database volume:
+If the SQL Server password is changed after the project volume exists, SQL Server keeps the original password stored in that volume and the API will fail to connect until both values match again. To intentionally discard only this project database volume:
 
 ```powershell
 docker compose -p niuro-loan-mvp down
@@ -152,7 +152,7 @@ dotnet test .\backend\src\Fundo.Services.Tests\Fundo.Services.Tests.csproj --fil
 ## Future improvements
 
 - Add authentication and authorization.
-- Add pagination and filtering for loan lists.
+- Add filtering and sorting for loan lists.
 - Add optimistic concurrency for payments.
 - Add an audit trail for loan and payment changes.
 - Add an amortization schedule.
