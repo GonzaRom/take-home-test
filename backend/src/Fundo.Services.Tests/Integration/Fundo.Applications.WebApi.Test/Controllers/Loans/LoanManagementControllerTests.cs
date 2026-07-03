@@ -22,6 +22,8 @@ namespace Fundo.Services.Tests.Integration.Fundo.Applications.WebApi.Test.Contro
 {
     public class LoanManagementControllerTests : IClassFixture<LoanWebApplicationFactory>
     {
+        private const int SeededLoanCount = 15;
+
         private readonly LoanWebApplicationFactory _factory;
         private readonly HttpClient _client;
 
@@ -82,12 +84,12 @@ namespace Fundo.Services.Tests.Integration.Fundo.Applications.WebApi.Test.Contro
             Assert.NotNull(pagedLoans);
             Assert.Equal(1, pagedLoans!.PageNumber);
             Assert.Equal(10, pagedLoans.PageSize);
-            Assert.Equal(3, pagedLoans.TotalCount);
-            Assert.Equal(1, pagedLoans.TotalPages);
+            Assert.Equal(SeededLoanCount, pagedLoans.TotalCount);
+            Assert.Equal(2, pagedLoans.TotalPages);
             Assert.False(pagedLoans.HasPreviousPage);
-            Assert.False(pagedLoans.HasNextPage);
-            Assert.Equal(3, pagedLoans.Items.Count);
-            Assert.Equal("Robert Johnson", pagedLoans.Items[0].ApplicantName);
+            Assert.True(pagedLoans.HasNextPage);
+            Assert.Equal(10, pagedLoans.Items.Count);
+            Assert.Equal("Nadia Flores", pagedLoans.Items[0].ApplicantName);
         }
 
         [Fact]
@@ -102,28 +104,30 @@ namespace Fundo.Services.Tests.Integration.Fundo.Applications.WebApi.Test.Contro
             Assert.NotNull(pagedLoans);
             Assert.Equal(2, pagedLoans!.PageNumber);
             Assert.Equal(2, pagedLoans.PageSize);
-            Assert.Equal(3, pagedLoans.TotalCount);
-            Assert.Equal(2, pagedLoans.TotalPages);
+            Assert.Equal(SeededLoanCount, pagedLoans.TotalCount);
+            Assert.Equal(8, pagedLoans.TotalPages);
             Assert.True(pagedLoans.HasPreviousPage);
-            Assert.False(pagedLoans.HasNextPage);
-            var loan = Assert.Single(pagedLoans.Items);
-            Assert.Equal("John Doe", loan.ApplicantName);
+            Assert.True(pagedLoans.HasNextPage);
+            Assert.Collection(
+                pagedLoans.Items,
+                loan => Assert.Equal("Grace Wilson", loan.ApplicantName),
+                loan => Assert.Equal("Omar Hassan", loan.ApplicantName));
         }
 
         [Fact]
         public async Task GetList_ShouldReturnEmptyItems_WhenPageIsBeyondAvailableData()
         {
             // Act
-            var response = await _client.GetAsync("/loans?pageNumber=3&pageSize=2");
+            var response = await _client.GetAsync("/loans?pageNumber=9&pageSize=2");
             var pagedLoans = await response.Content.ReadFromJsonAsync<PagedResult<LoanSummaryDto>>();
 
             // Assert
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
             Assert.NotNull(pagedLoans);
-            Assert.Equal(3, pagedLoans!.PageNumber);
+            Assert.Equal(9, pagedLoans!.PageNumber);
             Assert.Equal(2, pagedLoans.PageSize);
-            Assert.Equal(3, pagedLoans.TotalCount);
-            Assert.Equal(2, pagedLoans.TotalPages);
+            Assert.Equal(SeededLoanCount, pagedLoans.TotalCount);
+            Assert.Equal(8, pagedLoans.TotalPages);
             Assert.True(pagedLoans.HasPreviousPage);
             Assert.False(pagedLoans.HasNextPage);
             Assert.Empty(pagedLoans.Items);
