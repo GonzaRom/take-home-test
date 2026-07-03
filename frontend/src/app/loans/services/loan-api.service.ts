@@ -3,6 +3,9 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 
 import { environment } from '../../../environments/environment';
+import { CreateLoanRequest } from '../models/create-loan-request';
+import { LoanDetails } from '../models/loan-details';
+import { LoanPaymentRequest } from '../models/loan-payment-request';
 import { LoanSummary } from '../models/loan-summary';
 import { PagedResult, PageRequest } from '../models/pagination';
 
@@ -20,5 +23,17 @@ export class LoanApiService {
       .set('pageSize', pageSize.toString());
 
     return this.httpClient.get<PagedResult<LoanSummary>>(this.loansUrl, { params });
+  }
+
+  createLoan(request: CreateLoanRequest): Observable<LoanDetails> {
+    return this.httpClient.post<LoanDetails>(this.loansUrl, request);
+  }
+
+  getLoan(id: string): Observable<LoanDetails> {
+    return this.httpClient.get<LoanDetails>(`${this.loansUrl}/${id}`);
+  }
+
+  registerPayment(id: string, request: LoanPaymentRequest): Observable<LoanDetails> {
+    return this.httpClient.post<LoanDetails>(`${this.loansUrl}/${id}/payment`, request);
   }
 }

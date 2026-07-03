@@ -10,9 +10,10 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  min-height: 56px;
-  padding: 0 20px;
-  border-bottom: 1px solid #edf1f5;
+  gap: 16px;
+  min-height: 64px;
+  padding: 0 16px 0 20px;
+  border-bottom: 1px solid #e1e7ef;
 }
 
 .loan-card__caption {
@@ -21,17 +22,33 @@
   color: #435064;
 }
 
+.loan-card__actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.add-loan-button {
+  min-height: 36px;
+  padding: 0 14px;
+}
+
+.header-icon-button,
+.row-action-button {
+  color: #3157a3;
+}
+
 .table-wrap {
   overflow-x: auto;
 }
 
 mat-paginator {
-  border-top: 1px solid #edf1f5;
+  border-top: 1px solid #e1e7ef;
 }
 
 table {
   width: 100%;
-  min-width: 620px;
+  min-width: 760px;
 }
 
 th {
@@ -60,13 +77,54 @@ td {
 }
 
 .status-pill--active {
-  background: #e8f5ec;
-  color: #21633b;
+  background: #e7f6ec;
+  color: #166534;
 }
 
 .status-pill--paid {
   background: #edf2ff;
   color: #3157a3;
+}
+
+.actions-header,
+.actions-cell {
+  width: 128px;
+  text-align: center;
+}
+
+.actions-cell {
+  white-space: nowrap;
+}
+
+.row-actions {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.row-action-button {
+  --mdc-fab-container-color: #edf4ff;
+  --mdc-fab-icon-color: #175cd3;
+  --mat-fab-foreground-color: #175cd3;
+
+  border: 1px solid #d6e4ff;
+  box-shadow: none;
+  color: #175cd3;
+
+  &:hover:not(:disabled) {
+    --mdc-fab-container-color: #eaf1ff;
+  }
+
+  mat-icon {
+    width: 20px;
+    height: 20px;
+    font-size: 20px;
+  }
+}
+
+.disabled-tooltip-wrap {
+  display: inline-flex;
 }
 
 .empty-state {
@@ -94,6 +152,13 @@ td {
 
 @media (max-width: 640px) {
   .loan-card__header {
-    padding: 0 12px 0 16px;
+    align-items: flex-start;
+    flex-direction: column;
+    padding: 14px 12px 14px 16px;
+  }
+
+  .loan-card__actions {
+    width: 100%;
+    justify-content: flex-end;
   }
 }

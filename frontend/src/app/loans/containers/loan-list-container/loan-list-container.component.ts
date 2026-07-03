@@ -2,13 +2,19 @@ import { AsyncPipe } from '@angular/common';
 import { Component } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { BehaviorSubject, merge, Observable, of, Subject } from 'rxjs';
-import { catchError, debounceTime, map, shareReplay, startWith, switchMap } from 'rxjs/operators';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { BehaviorSubject, EMPTY, merge, Observable, of, Subject } from 'rxjs';
+import { catchError, debounceTime, exhaustMap, map, shareReplay, startWith, switchMap, takeUntil, tap } from 'rxjs/operators';
 
-import { LoanSummary } from '../../models/loan-summary';
+import { CreateLoanDialogComponent } from '../../dialogs/create-loan-dialog/create-loan-dialog.component';
+import { LoanDetailsDialogComponent } from '../../dialogs/loan-details-dialog/loan-details-dialog.component';
+import { RegisterPaymentDialogComponent } from '../../dialogs/register-payment-dialog/register-payment-dialog.component';
+import { isPaidLoanStatus, LoanSummary } from '../../models/loan-summary';
 import { PagedResult, PageRequest } from '../../models/pagination';
+import { extractApiErrorMessage } from '../../services/api-error-message';
 import { LoanApiService } from '../../services/loan-api.service';
 import { LoanTableComponent } from '../../presenters/loan-table/loan-table.component';
 
@@ -30,6 +36,7 @@ interface LoanListViewModel {
     LoanTableComponent,
     MatButtonModule,
     MatCardModule,
+    MatDialogModule,
     MatIconModule,
     MatProgressSpinnerModule,
   ],
@@ -63,7 +70,11 @@ export class LoanListContainerComponent {
     shareReplay({ bufferSize: 1, refCount: true }),
   );
 
-  constructor(private readonly loanApiService: LoanApiService) {}
+  constructor(
+    private readonly dialog: MatDialog,
+    private readonly loanApiService: LoanApiService,
+    private readonly snackBar: MatSnackBar,
+  ) {}
 
   refresh(): void {
     this.refreshTrigger.next();
@@ -71,6 +82,82 @@ export class LoanListContainerComponent {
 
   changePage(pageRequest: PageRequest): void {
     this.pageRequestTrigger.next(pageRequest);
+  }
+
+  openCreateLoanDialog(): void {
+    const dialogRef = this.dialog.open(CreateLoanDialogComponent, {
+      width: '620px',
+      maxWidth: 'calc(100vw - 24px)',
+      autoFocus: 'first-tabbable',
+    });
+
+    dialogRef.componentInstance.createRequested
+      .pipe(
+        exhaustMap((request) => {
+          dialogRef.componentInstance.startSubmit();
+
+          return this.loanApiService.createLoan(request).pipe(
+            tap(() => {
+              this.showSuccess('Loan created successfully.');
+              dialogRef.close(true);
+              this.refresh();
+            }),
+            catchError((error: unknown) => {
+              dialogRef.componentInstance.finishSubmitWithError(
+                extractApiErrorMessage(error, 'Unable to create loan. Please review the form and try again.'),
+              );
+              return EMPTY;
+            }),
+          );
+        }),
+        takeUntil(dialogRef.afterClosed()),
+      )
+      .subscribe();
+  }
+
+  openLoanDetailsDialog(loan: LoanSummary): void {
+    this.dialog.open(LoanDetailsDialogComponent, {
+      width: '760px',
+      maxWidth: 'calc(100vw - 24px)',
+      autoFocus: 'dialog',
+      data: { loanId: loan.id },
+    });
+  }
+
+  openRegisterPaymentDialog(loan: LoanSummary): void {
+    if (!this.canRegisterPayment(loan)) {
+      return;
+    }
+
+    const dialogRef = this.dialog.open(RegisterPaymentDialogComponent, {
+      width: '540px',
+      maxWidth: 'calc(100vw - 24px)',
+      autoFocus: 'first-tabbable',
+      data: { loan },
+    });
+
+    dialogRef.componentInstance.paymentRequested
+      .pipe(
+        exhaustMap((request) => {
+          dialogRef.componentInstance.startSubmit();
+
+          return this.loanApiService.registerPayment(loan.id, request).pipe(
+            tap(() => {
+              this.showSuccess('Payment registered successfully.');
+              dialogRef.close(true);
+              this.refresh();
+            }),
+            catchError((error: unknown) => {
+              dialogRef.componentInstance.finishSubmitWithError(
+                extractApiErrorMessage(error, 'Unable to register payment. Please review the form and try again.'),
+              );
+              return EMPTY;
+            }),
+          );
+        }),
+        takeUntil(dialogRef.afterClosed()),
+      )
+      .subscribe();
   }
 
   private loadedViewModel(response: PagedResult<LoanSummary>): LoanListViewModel {
@@ -107,5 +194,15 @@ export class LoanListContainerComponent {
       isEmpty: false,
       error: 'Unable to load loans. Please confirm the backend API is running and try again.',
     };
+  }
+
+  private canRegisterPayment(loan: LoanSummary): boolean {
+    return !isPaidLoanStatus(loan.status) && loan.currentBalance > 0;
+  }
+
+  private showSuccess(message: string): void {
+    this.snackBar.open(message, 'Dismiss', {
+      duration: 4000,
+    });
   }
 }

@@ -28,8 +28,11 @@
           [pageNumber]="vm.pageNumber"
           [pageSize]="vm.pageSize"
           [isEmpty]="vm.isEmpty"
+          (addLoanRequested)="openCreateLoanDialog()"
           (pageChanged)="changePage($event)"
           (refreshRequested)="refresh()"
+          (viewDetailsRequested)="openLoanDetailsDialog($event)"
+          (registerPaymentRequested)="openRegisterPaymentDialog($event)"
         ></app-loan-table>
       }
     }

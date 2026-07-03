@@ -1,0 +1,64 @@
+<h2 mat-dialog-title>Register Payment</h2>
+
+<form [formGroup]="form" (ngSubmit)="submit()">
+  <mat-dialog-content class="dialog-content">
+    <div class="loan-context" aria-label="Selected loan">
+      <div>
+        <span class="label">Applicant</span>
+        <strong>{{ data.loan.applicantName }}</strong>
+      </div>
+      <div>
+        <span class="label">Current balance</span>
+        <strong>{{ data.loan.currentBalance | currency }}</strong>
+      </div>
+    </div>
+
+    @if (submitError) {
+      <div class="dialog-error" role="alert">
+        <mat-icon aria-hidden="true">error_outline</mat-icon>
+        <span>{{ submitError }}</span>
+      </div>
+    }
+
+    <mat-form-field appearance="outline">
+      <mat-label>Payment amount</mat-label>
+      <input
+        matInput
+        type="number"
+        min="0.01"
+        [max]="data.loan.currentBalance"
+        step="0.01"
+        placeholder="0.00"
+        formControlName="amount"
+      />
+      @if (form.controls.amount.hasError('required')) {
+        <mat-error>Amount is required.</mat-error>
+      } @else if (form.controls.amount.hasError('min')) {
+        <mat-error>Must be greater than 0.</mat-error>
+      } @else if (form.controls.amount.hasError('paymentExceedsBalance')) {
+        <mat-error>Cannot exceed current balance.</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Note</mat-label>
+      <textarea matInput rows="3" maxlength="500" formControlName="note"></textarea>
+      <mat-hint align="end">{{ form.controls.note.value.length }}/500</mat-hint>
+      @if (form.controls.note.hasError('maxlength')) {
+        <mat-error>Use 500 characters or fewer.</mat-error>
+      }
+    </mat-form-field>
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button mat-button type="button" [disabled]="isSubmitting" (click)="cancel()">Cancel</button>
+    <button mat-flat-button type="submit" [disabled]="isSubmitting">
+      @if (isSubmitting) {
+        <mat-progress-spinner diameter="18" mode="indeterminate" aria-label="Registering payment"></mat-progress-spinner>
+      } @else {
+        <mat-icon aria-hidden="true">payments</mat-icon>
+      }
+      Register Payment
+    </button>
+  </mat-dialog-actions>
+</form>
